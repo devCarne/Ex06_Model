@@ -2,9 +2,10 @@ package com.example.ex06_model;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,5 +68,46 @@ public class MyController {
     @RequestMapping("/formTest3")
     public String formTest3(Member member, Model model) {
         return "formTest3";
+    }
+
+    @RequestMapping("/formTest4/{studentId}/{name}")
+    public String getStudent(@PathVariable String studentId, @PathVariable String name, Model model) {
+        model.addAttribute("id", studentId);
+        model.addAttribute("name", name);
+
+        return "formTest4";
+    }
+
+    @RequestMapping("/insertForm")
+    public String insert1() {
+        return "createPage";
+    }
+
+    @RequestMapping("/create")
+    public String insert2(@ModelAttribute("dto") @Validated ContentDTO cDTO, BindingResult result) {
+
+        String page = "createDonePage";
+        System.out.println(cDTO);
+
+//        ContentValidator validator = new ContentValidator();
+//        validator.validate(cDTO, result);
+
+        if (result.hasErrors()) {
+            System.out.println("getAllErrors : " + result.getAllErrors());
+
+            if (result.getFieldError("writer") != null) {
+                System.out.println("1:" + result.getFieldError("writer").getCode());
+            }
+            if (result.getFieldError("content") != null) {
+                System.out.println("2:" + result.getFieldError("content").getCode());
+            }
+            page = "createPage";
+        }
+        return page;
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.setValidator(new ContentValidator());
     }
 }
